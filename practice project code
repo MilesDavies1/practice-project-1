@@ -1,0 +1,65 @@
+.data
+    enter_val: .asciiz "\n" # tells the mips interpreter to interpret the data passed in as an ascii string
+    input_reserve: .space 11 # .space reserves 2 words (8 bytes)
+.text
+
+main:
+    li $v0, 8 # system call to read a string 
+    la $a0, input_reserve # load the address of the input reserve (user input)
+    li $a1, 11 # load 11 into the mips register
+    li $a2, 5
+    syscall
+
+    enter_Input:
+    move $t3, $a0 # moves contents of a0 intp t3
+    lb $s2, ($t3) # transfers a byte of t3 into s2
+
+    # check values
+    verify:
+    beq $t0, 10, output # jump to the output if the content in t0 is == 10
+
+    sort_values:
+    addi $t0, $t0, 1
+    bge $s2, 97, lowercaseU # lowercase (BLT = less than)
+    bge $s2, 65, uppercaseU # uppercase (BLT = less than)
+    bge $s2, 48, numbers # for 0, BLT = less than
+
+    # creating a function
+    counter:
+    addi $t3, $t3, 1
+    lb $s2,($t3)
+    j verify
+
+    # uppercase character U
+    uppercaseU:
+    bge $s2, 85, counter
+    sub $s2, $s2, 55
+    add $s3, $s3, $s2
+    j counter
+
+    # for the lowercase character u
+    lowercaseU:
+    bge $s2, 117, counter # for the letter u
+    sub $s2, $s2, 87
+    add $s3, $s3, $s2
+    j counter
+
+    numbers:
+    bge $s2, 57, counter
+    sub $s2, $s2, 48
+    add $s3, $s3, $s2
+    j counter
+
+    output:
+    li $v0, 4
+    la $a0, enter_val
+    syscall
+
+
+    li $v0, 1
+    move $a0, $s3
+    mul $a0, $s3, $a2
+    syscall
+
+li $v0, 10
+syscall
